@@ -7,7 +7,7 @@ usage = 'Usage: ./main.py <training.csv>'
 
 def crossvalidate(dataset):
     # split the data 80/20
-    dataset = dataset[:int(.25 * len(dataset))]
+    dataset = dataset[:int(.5 * len(dataset))]
     print ("Length of dataset: {0}".format(len(dataset)))
 
     split_idx = int(.8 * len(dataset))
