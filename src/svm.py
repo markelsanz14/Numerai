@@ -1,5 +1,6 @@
 from sklearn import svm
 from sklearn.metrics import log_loss
+from sklearn.metrics import accuracy_score
 
 class svm:
 
@@ -12,8 +13,13 @@ class svm:
         labels = [entry[1] for entry in self.training_set]
         self.classifier.fit(features, labels)
 
-    def predict():
-        pred = self.classifier.predict()
+    def predict(test_set):
+        features = [entry[0] for entry in self.test_set]
+        labels = [entry[1] for entry in self.test_set]
+        predictions = self.classifier.predict(features)
+        accuracy_score(labels, predictions)
+
+    def probability():
         dist = self.classifier.decision_function()
         max_pos = max(dist)
         max_neg = min(dist)
