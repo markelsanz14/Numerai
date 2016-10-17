@@ -4,9 +4,9 @@
 import csv
 import sys
 
-def getdata(filename):
+def process_dataset(filename):
     trainingset = []
-    with(open(filename) as dataset:
+    with open(filename) as dataset:
         reader = csv.reader(dataset)
         trainingset = [(row[:-1], row[-1]) for row in reader]
     del trainingset[0]
