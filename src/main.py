@@ -13,4 +13,5 @@ if __name__ == "__main__":
         exit()
     trainingfile = sys.argv[1]
     dataset = process_dataset(trainingfile)
-    print(dataset[0])
+    mysvm = svm(dataset)
+    mysvm.fit()
