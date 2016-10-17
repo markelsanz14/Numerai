@@ -15,9 +15,9 @@ def crossvalidate(dataset):
     validateset = dataset[-split_idx:]
 
     # make a new svm for this dataset
-    xvalsvm = SvmModel(trainingset)
+    xvalsvm = SvmModel()
     print ("Fitting model...")
-    xvalsvm.fit()
+    xvalsvm.fit(trainingset)
     print ("Calculating predictions...")
     print (xvalsvm.predict(validateset))
 

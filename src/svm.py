@@ -4,13 +4,12 @@ from sklearn.metrics import accuracy_score
 
 class SvmModel:
 
-    def __init__(self, training_set):
-        self.training_set = training_set
+    def __init__(self):
         self.classifier = svm.SVC()
 
-    def fit(self):
-        features = [entry[0] for entry in self.training_set]
-        labels = [entry[1] for entry in self.training_set]
+    def fit(self, training_set):
+        features = [entry[0] for entry in training_set]
+        labels = [entry[1] for entry in training_set]
         self.classifier.fit(features, labels)
 
     def predict(self, test_set):
