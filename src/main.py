@@ -7,19 +7,19 @@ usage = 'Usage: ./main.py <training.csv>'
 
 def crossvalidate(dataset):
     # split the data 80/20
-    dataset = dataset[:int(.5 * len(dataset))]
-    print ("Length of dataset: {0}".format(len(dataset)))
-
     split_idx = int(.8 * len(dataset))
     trainingset = dataset[:split_idx]
-    validateset = dataset[-split_idx:]
+    validateset = dataset[split_idx:]
+
+    print ("# items in training set: {0}".format(len(trainingset)))
+    print ("# items in validation set: {0}".format(len(validateset)))
 
     # make a new svm for this dataset
     xvalsvm = SvmModel()
     print ("Fitting model...")
     xvalsvm.fit(trainingset)
     print ("Calculating predictions...")
-    print (xvalsvm.predict(validateset))
+    print ("Accuracy: {0}".format(xvalsvm.predict(validateset)))
 
 
 if __name__ == "__main__":
