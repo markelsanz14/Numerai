@@ -4,7 +4,15 @@
 import csv
 import sys
 
-def process_dataset(filename):
+def as_dataset(filename):
+    """
+    Returns a list of tuples:
+    [
+      ([f1,f2,f3,..], class),
+      ([f1,f2,f3,..], class),
+      ...
+    ]
+    """
     trainingset = []
     with open(filename) as dataset:
         reader = csv.reader(dataset)
