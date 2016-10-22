@@ -2,6 +2,7 @@
 import sys
 from data import *
 from svm import *
+from visualizeData import *
 
 usage = 'Usage: ./main.py <training.csv>'
 
@@ -12,7 +13,7 @@ def crossvalidate(dataset):
     validateset = dataset[split_idx:]
 
     print ("# items in training set: {0}".format(len(trainingset)))
-    print ("# items in validation set: {0}".format(len(validateset)))
+    print ("# items in test set: {0}".format(len(validateset)))
 
     # make a new svm for this dataset
     xvalsvm = SvmModel()
@@ -21,6 +22,9 @@ def crossvalidate(dataset):
     print ("Calculating predictions...")
     print ("Accuracy: {0}".format(xvalsvm.predict(validateset)))
 
+def visualize(dataset):
+	vis = visualizeData(dataset)
+	#vis.visualizeAll()
 
 if __name__ == "__main__":
     # validate usage
@@ -33,8 +37,10 @@ if __name__ == "__main__":
     dataset = as_dataset(trainingfile)
 
     # crossvalidate
-    print ("Performing crossvalidation...")
-    crossvalidate(dataset)
+    #print ("Performing crossvalidation...")
+    #crossvalidate(dataset)
+
+    visualize(dataset)
 
     # predictions
     # ...
