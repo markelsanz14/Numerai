@@ -1,5 +1,3 @@
-#!/usr/bin/python3
-
 # sanitization routines for dataset
 import csv
 import sys
@@ -16,6 +14,14 @@ def as_dataset(filename):
     trainingset = []
     with open(filename) as dataset:
         reader = csv.reader(dataset)
-        trainingset = [(row[:-1], row[-1]) for row in reader]
-    del trainingset[0]
+        next(reader, None) # skip header
+        trainingset = [([float(x) for x in row[:-1]], int(row[-1])) for row in reader]
     return trainingset
+
+def as_predictionset(filename):
+    predictionset = []
+    with open(filename) as dataset:
+        reader = csv.reader(dataset)
+        next(reader, None) # skip header
+        predictionset = [ map(lambda x: float(x), row) for row in reader ]
+    return predictionset

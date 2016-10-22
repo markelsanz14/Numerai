@@ -1,41 +1,41 @@
-#!/usr/bin/python
-import sys
+from sys import argv
 from data import *
-from svm import *
+from models import *
 
-usage = 'Usage: ./main.py <training.csv>'
+available_models = {
+        'svm': SvmModel,
+        'gaussiannb': GaussianNBModel
+}
 
-def crossvalidate(dataset):
-    # split the data 80/20
-    split_idx = int(.8 * len(dataset))
-    trainingset = dataset[:split_idx]
-    validateset = dataset[split_idx:]
+usage = '''
+Usage:
+    main.py help
+    main.py crossvalidate <model> <training.csv>
+    main.py predict <model> <training.csv> <predict.csv>
+'''
 
-    print ("# items in training set: {0}".format(len(trainingset)))
-    print ("# items in validation set: {0}".format(len(validateset)))
+crossval_percentage = 0.8
 
-    # make a new svm for this dataset
-    xvalsvm = SvmModel()
-    print ("Fitting model...")
-    xvalsvm.fit(trainingset)
-    print ("Calculating predictions...")
-    print ("Accuracy: {0}".format(xvalsvm.predict(validateset)))
-
+def showhelp():
+    print(usage)
+    print("Available models:")
+    print(available_models)
 
 if __name__ == "__main__":
     # validate usage
-    if len(sys.argv) < 2:
-        print(usage)
+    if len(argv) < 2 or argv[1] == "help":
+        showhelp()
         exit()
 
-    # get training data
-    trainingfile = sys.argv[1]
-    dataset = as_dataset(trainingfile)
+    # get dataset
+    training_data = as_dataset(argv[3])
+    # get model
+    model = available_models[argv[2]]()
 
-    # crossvalidate
-    print ("Performing crossvalidation...")
-    crossvalidate(dataset)
-
-    # predictions
-    # ...
-
+    if argv[1] == "crossvalidate":
+        score = model.crossvalidate(training_data, crossval_percentage)
+        print("Accuracy of {0}: {1}".format(argv[2], score))
+    elif argv[1] == "predict":
+        prediction_data = as_predictionset(argv[4])
+        model.fit(training_data)
+        predictions = model.predict(prediction_data)
