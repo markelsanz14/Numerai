@@ -55,47 +55,36 @@ t_features, t_labels = reformat(t_features, t_labels)
 #    ...
 #Let's load all the data into TensorFlow and build the computation graph corresponding to our training:
 
-# With gradient descent training, even this much data is prohibitive.
-# Subset the training data for faster turnaround.
+batch_size = 128
 
 graph = tf.Graph()
 with graph.as_default():
-    # Input data.
-    # Load the training, validation and test data into constants that are
-    # attached to the graph.
-    tf_train_dataset = tf.constant(t_features[:,:])
-    tf_train_labels = tf.constant(t_labels[:])
+
+    # Input data. For the training data, we use a placeholder that will be fed
+    # at run time with a training minibatch.
+    tf_train_dataset = tf.placeholder(tf.float32, shape=(batch_size, num_features))
+    tf_train_labels = tf.placeholder(tf.float32, shape=(batch_size, num_labels))
     #tf_valid_dataset = tf.constant(valid_dataset)
     #tf_test_dataset = tf.constant(test_dataset)
 
-    # Variables.
-    # These are the parameters that we are going to be training. The weight
-    # matrix will be initialized using random values following a (truncated)
-    # normal distribution. The biases get initialized to zero.
+   # Variables.
     weights = tf.Variable(tf.truncated_normal([num_features, num_labels]))
     biases = tf.Variable(tf.zeros([num_labels]))
 
     # Training computation.
-    # We multiply the inputs with the weight matrix, and add biases. We compute
-    # the softmax and cross-entropy (it's one operation in TensorFlow, because
-    # it's very common, and it can be optimized). We take the average of this
-    # cross-entropy across all training examples: that's our loss.
     logits = tf.matmul(tf_train_dataset, weights) + biases
     loss = tf.reduce_mean(tf.nn.softmax_cross_entropy_with_logits(logits, tf_train_labels))
-
+  
     # Optimizer.
-    # We are going to find the minimum of this loss using gradient descent.
-    # Learning rate = 0.5
     optimizer = tf.train.GradientDescentOptimizer(0.5).minimize(loss)
-
+  
     # Predictions for the training, validation, and test data.
-    # These are not part of training, but merely here so that we can report
-    # accuracy figures as we train.
     train_prediction = tf.nn.softmax(logits)
     #valid_prediction = tf.nn.softmax(tf.matmul(tf_valid_dataset, weights) + biases)
     #test_prediction = tf.nn.softmax(tf.matmul(tf_test_dataset, weights) + biases)
 
-num_steps = 801
+
+num_steps = 123001
 
 def accuracy(predictions, labels):
     a = np.argmax(predictions)
@@ -109,22 +98,23 @@ def accuracy(predictions, labels):
     return (100.0 * np.sum(np.argmax(predictions,0) == np.argmax(labels,0)) / predictions.shape[0])
 
 with tf.Session(graph=graph) as session:
-    # This is a one-time operation which ensures the parameters get initialized as
-    # we described in the graph: random weights for the matrix, zeros for the
-    # biases. 
     tf.initialize_all_variables().run()
-    print('Initialized')
+    print("Initialized")
     for step in range(num_steps):
-        # Run the computations. We tell .run() that we want to run the optimizer,
-        # and get the loss value and the training predictions returned as numpy
-        # arrays.
-        _, l, predictions = session.run([optimizer, loss, train_prediction])
-        if (step % 100 == 0):
-            print('Loss at step %d: %f' % (step, l))
-            print('Training accuracy: %.1f%%' % accuracy(predictions, tf_train_labels))
-            # Calling .eval() on valid_prediction is basically like calling run(), but
-            # just to get that one numpy array. Note that it recomputes all its graph
-            # dependencies.
-            #print('Validation accuracy: %.1f%%' % accuracy(valid_prediction.eval(), valid_labels))
-    #print('Test accuracy: %.1f%%' % accuracy(test_prediction.eval(), test_labels))
+        # Pick an offset within the training data, which has been randomized.
+        # Note: we could use better randomization across epochs.
+        offset = (step * batch_size) % (t_labels.shape[0] - batch_size)
+        # Generate a minibatch.
+        batch_data = t_features[offset:(offset + batch_size), :]
+        batch_labels = t_labels[offset:(offset + batch_size), :]
+        # Prepare a dictionary telling the session where to feed the minibatch.
+        # The key of the dictionary is the placeholder node of the graph to be fed,
+        # and the value is the numpy array to feed to it.
+        feed_dict = {tf_train_dataset : batch_data, tf_train_labels : batch_labels}
+        _, l, predictions = session.run([optimizer, loss, train_prediction], feed_dict=feed_dict)
+        if (step % 500 == 0):
+            print("Minibatch loss at step %d: %f" % (step, l))
+            #print("Minibatch accuracy: %.1f%%" % accuracy(predictions, batch_labels))
+            #print("Validation accuracy: %.1f%%" % accuracy(valid_prediction.eval(), valid_labels))
+    #print("Test accuracy: %.1f%%" % accuracy(test_prediction.eval(), test_labels))
 
