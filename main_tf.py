@@ -9,6 +9,7 @@ from six.moves import cPickle as pickle
 from six.moves import range
 
 
+
 # Data processing
 def process_training_csv(filename):
     """
