@@ -2,7 +2,6 @@ import numpy as np
 import csv
 import tflearn
 import tensorflow as tf
-from sklearn.feature_selection import VarianceThreshold
 
 def load_training_data(filename):
   data, labels = [], []
@@ -34,22 +33,18 @@ def load_input_data(filename):
 # process input data
 t_data, t_labels = load_training_data('numerai_training_data.csv')
 
-print(t_data)
-print(t_labels)
-
 print("t_data[0][0]: {0}\nt_data[0]: {1}".format(t_data[0][0], t_data[0]))
 
 # input layer takes an unspecified amount of 21-vectors
 net = tflearn.input_data(shape=[None, 21])
-net = tflearn.fully_connected(net, 8)
-#net = tflearn.fully_connected(net, 8)
-net = tflearn.fully_connected(net, 2)
+net = tflearn.fully_connected(net, 8, activation='relu')
+net = tflearn.fully_connected(net, 2, activation='softmax')
 
-sgd = tflearn.SGD(learning_rate=.5, lr_decay=0.96, decay_step=10000)
-net = tflearn.regression(net, optimizer=sgd, loss='softmax_categorical_crossentropy')
+adadelta = tf.train.AdadeltaOptimizer()
+net = tflearn.regression(net, optimizer=adadelta, loss='softmax_categorical_crossentropy')
 
 model = tflearn.DNN(net)
-model.fit(t_data, t_labels, n_epoch=500000, batch_size=256, show_metric=True)
+model.fit(t_data, t_labels, n_epoch=200000, batch_size=256, show_metric=True, validation_set=0.15, snapshot_step=10000, snapshot_epoch=False)
 
 with open("model.tf", 'w') as model_file:
   model.save(model_file)
